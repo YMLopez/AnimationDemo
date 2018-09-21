@@ -4,21 +4,14 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
 import android.widget.Toast;
+
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -30,22 +23,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     TextView tv_scan;
     TextView tv_receive;
     TextView tv_update;
-
-
-    //忽略警告，去掉黄色
-    @SuppressLint("HandlerLeak")
-    private Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case 0:
-                    // 正式开始启动执行动画
-                    rotation.start();
-                    break;
-            }
-        }
-    };
-    private ObjectAnimator rotation;
 
 
     @Override
@@ -123,28 +100,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // 第二个参数"rotation"表明要执行旋转
         // 0f -> 360f，从旋转360度，也可以是负值，负值即为逆时针旋转，正值是顺时针旋转。
-        rotation = ObjectAnimator.ofFloat(cv_coin_menu, "rotation", original, rotate);
+        ObjectAnimator rotation = ObjectAnimator.ofFloat(cv_coin_menu, "rotation", original, rotate);
         // 动画的持续时间，执行多久？
         rotation.setDuration(250);
         // 正式开始启动执行动画
         rotation.start();
-
-        //暂时不用子线程，感觉有问题
-        /*new Thread(new Runnable() {
-            @Override
-            public void run() {
-                // 第二个参数"rotation"表明要执行旋转
-                // 0f -> 360f，从旋转360度，也可以是负值，负值即为逆时针旋转，正值是顺时针旋转。
-                rotation = ObjectAnimator.ofFloat(cv_coin_menu, "rotation", original, rotate);
-                // 动画的持续时间，执行多久？
-                rotation.setDuration(250);
-                // 正式开始启动执行动画
-                rotation.start();
-
-                //选择菜单按钮
-                handler.sendEmptyMessage(0);
-            }
-        }).start();*/
 
         beginButtonShow(cv_menu_update, tv_update);
         beginButtonShow(cv_menu_receive, tv_receive);
@@ -305,5 +265,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         cv_menu_update.setEnabled(isClickable);
     }
 
+    @Override
+    public void onBackPressed() {
+        if (isOpen) {
+            //开了就关掉
+            toggleTheShow();
+            //然后赋值状态
+            isOpen = false;
+        } else {
+            super.onBackPressed();
+        }
+    }
 
 }
