@@ -14,7 +14,9 @@ import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AnimationSet;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -68,6 +70,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
+        //开始你的表演
+        toggleTheShow();
+
         switch (view.getId()) {
             case R.id.cv_menu_scan:
                 Toast.makeText(this, "扫一扫！", Toast.LENGTH_SHORT).show();
@@ -77,10 +82,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.cv_menu_update:
                 Toast.makeText(this, "更新！", Toast.LENGTH_SHORT).show();
-                break;
-            case R.id.cv_coin_menu:
-                //开始你的表演
-                beginTheShow();
                 break;
         }
     }
@@ -102,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    private void beginTheShow() {
+    private void toggleTheShow() {
         //如果开了就关，关了就开,
         isOpen = !isOpen;
 
@@ -216,36 +217,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
         //translationY_scan.start();
 
-        float translationY_scan_start2 = -dipToPx(absY);
-        float translationY_scan_end2 = -dipToPx(absY + 20);
-        float translationY_scan_start3 = translationY_scan_end2;
-        float translationY_scan_end3 = translationY_scan_start2;
+        //回弹开始的地方
+        float translationY_scan_spring_original = -dipToPx(absY);
+        //往上回弹一次
+        float translationY_scan_spring_top = -dipToPx(absY + 18);
+        //往下回弹一次
+        float translationY_scan_spring_bottom = -dipToPx(absY - 6);
 
         switch (view.getId()) {
             case R.id.cv_menu_scan:
-                translationY_scan_start2 = -dipToPx(absY);
-                translationY_scan_end2 = -dipToPx(absY + 20);
-                translationY_scan_start3 = translationY_scan_end2;
-                translationY_scan_end3 = translationY_scan_start2;
+                translationY_scan_spring_original = -dipToPx(absY);
+                translationY_scan_spring_top = -dipToPx(absY + 18);
+                translationY_scan_spring_bottom = -dipToPx(absY - 8);
                 break;
             case R.id.cv_menu_receive:
-                translationY_scan_start2 = -dipToPx(absY);
-                translationY_scan_end2 = -dipToPx(absY + 12);
-                translationY_scan_start3 = translationY_scan_end2;
-                translationY_scan_end3 = translationY_scan_start2;
+                translationY_scan_spring_original = -dipToPx(absY);
+                translationY_scan_spring_top = -dipToPx(absY + 8);
+                translationY_scan_spring_bottom = -dipToPx(absY - 4);
                 break;
             case R.id.cv_menu_update:
-                translationY_scan_start2 = -dipToPx(absY);
-                translationY_scan_end2 = -dipToPx(absY + 6);
-                translationY_scan_start3 = translationY_scan_end2;
-                translationY_scan_end3 = translationY_scan_start2;
+                translationY_scan_spring_original = -dipToPx(absY);
+                translationY_scan_spring_top = -dipToPx(absY + 4);
+                translationY_scan_spring_bottom = -dipToPx(absY - 2);
                 break;
         }
 
-        ObjectAnimator translationY_scan2 = ObjectAnimator.ofFloat(view, "translationY", translationY_scan_start2, translationY_scan_end2);
-        //translationY_scan2.setDuration(30);
-        ObjectAnimator translationY_scan3 = ObjectAnimator.ofFloat(view, "translationY", translationY_scan_start3, translationY_scan_end3);
-        translationY_scan3.addListener(new AnimatorListenerAdapter() {
+        ObjectAnimator translationY_scan2 = ObjectAnimator.ofFloat(view, "translationY", translationY_scan_spring_original, translationY_scan_spring_top, translationY_scan_spring_original, translationY_scan_spring_bottom, translationY_scan_spring_original);
+        translationY_scan2.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 if (!isOpen) return;    //只有开启才会显示
@@ -264,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             setButtonClickable(true);
 
             //出去
-            translationY_scan_set.playSequentially(translationY_scan, translationY_scan2, translationY_scan3);
+            translationY_scan_set.playSequentially(translationY_scan, translationY_scan2);
         } else {
             //回来按钮就不能点击了
             setButtonClickable(false);
@@ -273,19 +271,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             translationY_scan_set.playSequentially(translationY_scan);
         }
 
-        long duration = 120;
+        long duration = 250;
         switch (view.getId()) {
             case R.id.cv_menu_scan:
-                duration = 120;
+                duration = 250;
                 break;
             case R.id.cv_menu_receive:
-                duration = 110;
+                duration = 220;
                 break;
             case R.id.cv_menu_update:
-                duration = 100;
+                duration = 180;
                 break;
         }
         translationY_scan_set.setDuration(duration);
+        //在开始时改变较慢，然后开始加速
+        //translationY_scan_set.setInterpolator(new AccelerateDecelerateInterpolator());
+        //在开始地方速度较快，然后开始减速
+        translationY_scan_set.setInterpolator(new DecelerateInterpolator());
         translationY_scan_set.start();
     }
 
