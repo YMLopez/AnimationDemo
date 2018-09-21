@@ -8,7 +8,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.view.View;
-import android.view.animation.DecelerateInterpolator;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -116,48 +117,72 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         hideText(tv);
 
         float absY = 240;
-        // 2. 扫一扫按钮的起终点
-        float translationY_scan_start = 0;
-        float translationY_scan_end = 0;
+        float translationY_start = 0;
+        float translationY_end = 0;
 
         if (isOpen) {
             switch (view.getId()) {
                 case R.id.cv_menu_scan:
                     absY = 240;
-                    translationY_scan_start = 0;
-                    translationY_scan_end = -dipToPx(240);
+                    translationY_start = 0;
+                    translationY_end = -dipToPx(240);
                     break;
                 case R.id.cv_menu_receive:
                     absY = 160;
-                    translationY_scan_start = 0;
-                    translationY_scan_end = -dipToPx(160);
+                    translationY_start = 0;
+                    translationY_end = -dipToPx(160);
                     break;
                 case R.id.cv_menu_update:
                     absY = 80;
-                    translationY_scan_start = 0;
-                    translationY_scan_end = -dipToPx(80);
+                    translationY_start = 0;
+                    translationY_end = -dipToPx(80);
                     break;
             }
         } else {
             switch (view.getId()) {
                 case R.id.cv_menu_scan:
-                    translationY_scan_start = -dipToPx(240);
-                    translationY_scan_end = 0;
+                    translationY_start = -dipToPx(240);
+                    translationY_end = 0;
                     break;
                 case R.id.cv_menu_receive:
-                    translationY_scan_start = -dipToPx(160);
-                    translationY_scan_end = 0;
+                    translationY_start = -dipToPx(160);
+                    translationY_end = 0;
                     break;
                 case R.id.cv_menu_update:
-                    translationY_scan_start = -dipToPx(80);
-                    translationY_scan_end = 0;
+                    translationY_start = -dipToPx(80);
+                    translationY_end = 0;
                     break;
             }
         }
 
-        ObjectAnimator translationY_scan = ObjectAnimator.ofFloat(view, "translationY", translationY_scan_start, translationY_scan_end);
-        //translationY_scan.setDuration(220);
-        translationY_scan.addListener(new AnimatorListenerAdapter() {
+        //回弹开始的地方
+        float translationY_spring_original = -dipToPx(absY);
+        //往上回弹一次
+        float translationY_spring_top = -dipToPx(absY + 30);
+        //往下回弹一次
+        float translationY_spring_bottom = -dipToPx(absY - 12);
+
+        switch (view.getId()) {
+            case R.id.cv_menu_scan:
+                translationY_spring_original = -dipToPx(absY);
+                translationY_spring_top = -dipToPx(absY + 30);
+                translationY_spring_bottom = -dipToPx(absY - 12);
+                break;
+            case R.id.cv_menu_receive:
+                translationY_spring_original = -dipToPx(absY);
+                translationY_spring_top = -dipToPx(absY + 8);
+                translationY_spring_bottom = -dipToPx(absY - 4);
+                break;
+            case R.id.cv_menu_update:
+                translationY_spring_original = -dipToPx(absY);
+                translationY_spring_top = -dipToPx(absY + 4);
+                translationY_spring_bottom = -dipToPx(absY - 2);
+                break;
+        }
+
+        ObjectAnimator translationY_animator = ObjectAnimator.ofFloat(view, "translationY", translationY_start, translationY_spring_top, translationY_spring_bottom, translationY_spring_original);
+        //translationY_animator.setDuration(220);
+        translationY_animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
                 super.onAnimationStart(animation);
@@ -169,43 +194,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                if (isOpen) return;
-                //回程动画结束了就直接关闭按钮的显示
-                view.setVisibility(View.GONE);
-                hideText(tv);
-            }
-        });
-        //translationY_scan.start();
-
-        //回弹开始的地方
-        float translationY_scan_spring_original = -dipToPx(absY);
-        //往上回弹一次
-        float translationY_scan_spring_top = -dipToPx(absY + 18);
-        //往下回弹一次
-        float translationY_scan_spring_bottom = -dipToPx(absY - 6);
-
-        switch (view.getId()) {
-            case R.id.cv_menu_scan:
-                translationY_scan_spring_original = -dipToPx(absY);
-                translationY_scan_spring_top = -dipToPx(absY + 18);
-                translationY_scan_spring_bottom = -dipToPx(absY - 8);
-                break;
-            case R.id.cv_menu_receive:
-                translationY_scan_spring_original = -dipToPx(absY);
-                translationY_scan_spring_top = -dipToPx(absY + 8);
-                translationY_scan_spring_bottom = -dipToPx(absY - 4);
-                break;
-            case R.id.cv_menu_update:
-                translationY_scan_spring_original = -dipToPx(absY);
-                translationY_scan_spring_top = -dipToPx(absY + 4);
-                translationY_scan_spring_bottom = -dipToPx(absY - 2);
-                break;
-        }
-
-        ObjectAnimator translationY_scan2 = ObjectAnimator.ofFloat(view, "translationY", translationY_scan_spring_original, translationY_scan_spring_top, translationY_scan_spring_original, translationY_scan_spring_bottom, translationY_scan_spring_original);
-        translationY_scan2.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
                 if (!isOpen) return;    //只有开启才会显示
                 if (tv.getVisibility() == View.INVISIBLE) {
                     //抖完了就显示
@@ -213,41 +201,64 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
         });
+        //translationY_animator.start();
+
+        ObjectAnimator translationY_scan2 = ObjectAnimator.ofFloat(view, "translationY", translationY_start, translationY_end);
+        translationY_scan2.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (isOpen) return;
+                //回程动画结束了就直接关闭按钮的显示
+                view.setVisibility(View.GONE);
+                hideText(tv);
+            }
+        });
 
         //开始组合动画的表演
         AnimatorSet translationY_scan_set = new AnimatorSet();
-        //translationY_scan_set.play(translationY_scan);
+        //translationY_scan_set.play(translationY_animator);
+        long duration = 300;
+
         if (isOpen) {
             //出去按钮需要重置点击状态
             setButtonClickable(true);
-
             //出去
-            translationY_scan_set.playSequentially(translationY_scan, translationY_scan2);
+            translationY_scan_set.play(translationY_animator);
+            //在开始和结束的时较慢，中间加速
+            translationY_scan_set.setInterpolator(new AccelerateDecelerateInterpolator());
+
+            switch (view.getId()) {
+                case R.id.cv_menu_scan:
+                    duration = 300;
+                    break;
+                case R.id.cv_menu_receive:
+                    duration = 280;
+                    break;
+                case R.id.cv_menu_update:
+                    duration = 260;
+                    break;
+            }
         } else {
             //回来按钮就不能点击了
             setButtonClickable(false);
+            translationY_scan_set.play(translationY_scan2);
+            //在开始时改变较慢，然后开始加速
+            translationY_scan_set.setInterpolator(new AccelerateInterpolator());
 
-            //回来
-            translationY_scan_set.playSequentially(translationY_scan);
+            switch (view.getId()) {
+                case R.id.cv_menu_scan:
+                    duration = 100;
+                    break;
+                case R.id.cv_menu_receive:
+                    duration = 100;
+                    break;
+                case R.id.cv_menu_update:
+                    duration = 100;
+                    break;
+            }
         }
 
-        long duration = 250;
-        switch (view.getId()) {
-            case R.id.cv_menu_scan:
-                duration = 250;
-                break;
-            case R.id.cv_menu_receive:
-                duration = 220;
-                break;
-            case R.id.cv_menu_update:
-                duration = 180;
-                break;
-        }
         translationY_scan_set.setDuration(duration);
-        //在开始时改变较慢，然后开始加速
-        //translationY_scan_set.setInterpolator(new AccelerateDecelerateInterpolator());
-        //在开始地方速度较快，然后开始减速
-        translationY_scan_set.setInterpolator(new DecelerateInterpolator());
         translationY_scan_set.start();
     }
 
