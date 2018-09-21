@@ -158,15 +158,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //回弹开始的地方
         float translationY_spring_original = -dipToPx(absY);
         //往上回弹一次
-        float translationY_spring_top = -dipToPx(absY + 16);
+        float translationY_spring_top = -dipToPx(absY + 20);
         //往下回弹一次
-        float translationY_spring_bottom = -dipToPx(absY - 8);
+        float translationY_spring_bottom = -dipToPx(absY - 12);
 
         switch (view.getId()) {
             case R.id.cv_menu_scan:
                 translationY_spring_original = -dipToPx(absY);
-                translationY_spring_top = -dipToPx(absY + 16);
-                translationY_spring_bottom = -dipToPx(absY - 8);
+                translationY_spring_top = -dipToPx(absY + 24);
+                translationY_spring_bottom = -dipToPx(absY - 12);
                 break;
             case R.id.cv_menu_receive:
                 translationY_spring_original = -dipToPx(absY);
@@ -195,13 +195,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         translationY_animator.setInterpolator(new AccelerateDecelerateInterpolator());
         // 2. 从最顶端回到原始位置
         ObjectAnimator translationY2 = ObjectAnimator.ofFloat(view, "translationY", translationY_spring_top, translationY_spring_original);
-        translationY2.setDuration(350);
+        translationY2.setDuration(300);
         // 3. 从原始位置往下弹动一下
         ObjectAnimator translationY3 = ObjectAnimator.ofFloat(view, "translationY", translationY_spring_original, translationY_spring_bottom);
-        translationY3.setDuration(150);
+        translationY3.setDuration(80);
         // 4. 从下端位置往上复原位置
         ObjectAnimator translationY4 = ObjectAnimator.ofFloat(view, "translationY", translationY_spring_bottom, translationY_spring_original);
-        translationY4.setDuration(200);
+        translationY4.setDuration(120);
         translationY4.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
