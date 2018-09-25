@@ -165,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (view.getId()) {
             case R.id.cv_menu_scan:
                 translationY_spring_original = -dipToPx(absY);
-                translationY_spring_top = -dipToPx(absY + 24);
+                translationY_spring_top = -dipToPx(absY + 16);
                 translationY_spring_bottom = -dipToPx(absY - 12);
                 break;
             case R.id.cv_menu_receive:
@@ -181,8 +181,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         // 1. 出发到达最顶端
-        ObjectAnimator translationY_animator = ObjectAnimator.ofFloat(view, "translationY", translationY_start, translationY_spring_original);
-        translationY_animator.setDuration(300);
+        ObjectAnimator translationY_animator = ObjectAnimator.ofFloat(view, "translationY", translationY_start, translationY_spring_top);
+        translationY_animator.setDuration(200);
         translationY_animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -192,16 +192,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
         });
-        translationY_animator.setInterpolator(new AccelerateDecelerateInterpolator());
+        //translationY_animator.setInterpolator(new AccelerateDecelerateInterpolator());
         // 2. 从最顶端回到原始位置
         ObjectAnimator translationY2 = ObjectAnimator.ofFloat(view, "translationY", translationY_spring_top, translationY_spring_original);
-        translationY2.setDuration(300);
+        translationY2.setDuration(200);
         // 3. 从原始位置往下弹动一下
         ObjectAnimator translationY3 = ObjectAnimator.ofFloat(view, "translationY", translationY_spring_original, translationY_spring_bottom);
         translationY3.setDuration(80);
         // 4. 从下端位置往上复原位置
         ObjectAnimator translationY4 = ObjectAnimator.ofFloat(view, "translationY", translationY_spring_bottom, translationY_spring_original);
-        translationY4.setDuration(120);
+
+        /*if (isOpen) {
+
+        }
+        switch (view.getId()) {
+            case R.id.cv_menu_scan:
+                duration = 200;
+                break;
+            case R.id.cv_menu_receive:
+                duration = 180;
+                break;
+            case R.id.cv_menu_update:
+                duration = 160;
+                break;
+        }*/
+
+        translationY4.setDuration(160);
+
         translationY4.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -240,17 +257,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             translationY_scan_set.playSequentially(translationY_animator, translationY2, translationY3, translationY4);
 
             //在开始和结束的时较慢，中间加速
-            //translationY_scan_set.setInterpolator(new AccelerateDecelerateInterpolator());
+            translationY_scan_set.setInterpolator(new AccelerateDecelerateInterpolator());
 
             switch (view.getId()) {
                 case R.id.cv_menu_scan:
-                    duration = 300;
+                    duration = 200;
                     break;
                 case R.id.cv_menu_receive:
-                    duration = 280;
+                    duration = 180;
                     break;
                 case R.id.cv_menu_update:
-                    duration = 260;
+                    duration = 160;
                     break;
             }
         } else {
