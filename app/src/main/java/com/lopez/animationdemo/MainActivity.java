@@ -87,21 +87,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // 1. 菜单按钮的起终点
         final float rotate;
+        final float rotate2;
         final float original;
 
         if (isOpen) {
             //开，顺时针旋转45°
             rotate = 45;
             original = 0f;
+            rotate2 = 60f;
         } else {
             //关，逆时针旋转45°回去
             rotate = 0f;
             original = 45f;
+            rotate2 = 60f;
         }
 
         // 第二个参数"rotation"表明要执行旋转
         // 0f -> 360f，从旋转360度，也可以是负值，负值即为逆时针旋转，正值是顺时针旋转。
         ObjectAnimator rotation = ObjectAnimator.ofFloat(cv_coin_menu, "rotation", original, rotate);
+        if (isOpen) {
+            //开的会有抖动幅度
+            rotation = ObjectAnimator.ofFloat(cv_coin_menu, "rotation", original, rotate2, rotate);
+        }
+
+        //中间快，两端慢
+        rotation.setInterpolator(new AccelerateDecelerateInterpolator());
         // 动画的持续时间，执行多久？
         rotation.setDuration(250);
         // 正式开始启动执行动画
@@ -181,7 +191,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         // 1. 出发到达最顶端
-        ObjectAnimator translationY_animator = ObjectAnimator.ofFloat(view, "translationY", translationY_start, translationY_spring_top);
+        ObjectAnimator translationY_animator = ObjectAnimator.ofFloat(view, "translationY", translationY_start, translationY_end);
         translationY_animator.setDuration(200);
         translationY_animator.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -191,9 +201,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     view.setVisibility(View.VISIBLE);
                 }
             }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                if (!isOpen) return;    //只有开启才会显示
+                if (tv.getVisibility() == View.INVISIBLE) {
+                    //抖完了就显示
+                    tv.setVisibility(View.VISIBLE);
+
+                    ObjectAnimator alphaAnimator = ObjectAnimator.ofFloat(tv, "alpha", 0, 1);
+                    alphaAnimator.setDuration(200);
+                    alphaAnimator.start();
+                }
+            }
         });
         //translationY_animator.setInterpolator(new AccelerateDecelerateInterpolator());
-        // 2. 从最顶端回到原始位置
+        /*// 2. 从最顶端回到原始位置
         ObjectAnimator translationY2 = ObjectAnimator.ofFloat(view, "translationY", translationY_spring_top, translationY_spring_original);
         translationY2.setDuration(200);
         // 3. 从原始位置往下弹动一下
@@ -201,25 +225,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         translationY3.setDuration(80);
         // 4. 从下端位置往上复原位置
         ObjectAnimator translationY4 = ObjectAnimator.ofFloat(view, "translationY", translationY_spring_bottom, translationY_spring_original);
+        translationY4.setDuration(160);*/
 
-        /*if (isOpen) {
-
-        }
-        switch (view.getId()) {
-            case R.id.cv_menu_scan:
-                duration = 200;
-                break;
-            case R.id.cv_menu_receive:
-                duration = 180;
-                break;
-            case R.id.cv_menu_update:
-                duration = 160;
-                break;
-        }*/
-
-        translationY4.setDuration(160);
-
-        translationY4.addListener(new AnimatorListenerAdapter() {
+        /*translationY4.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
@@ -229,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     tv.setVisibility(View.VISIBLE);
                 }
             }
-        });
+        });*/
 
         /**
          *  回程动画
@@ -248,28 +256,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //开始组合动画的表演
         AnimatorSet translationY_scan_set = new AnimatorSet();
         //translationY_scan_set.play(translationY_animator);
-        long duration = 300;
+        long duration = 250;
 
         if (isOpen) {
             //出去 按钮需要重置点击状态
             setButtonClickable(true);
+            translationY_scan_set.play(translationY_animator);
             //translationY_scan_set.play(translationY_animator).before(translationY2).before(translationY3).before(translationY4);
-            translationY_scan_set.playSequentially(translationY_animator, translationY2, translationY3, translationY4);
+            //translationY_scan_set.playSequentially(translationY_animator, translationY2, translationY3, translationY4);
 
             //在开始和结束的时较慢，中间加速
             translationY_scan_set.setInterpolator(new AccelerateDecelerateInterpolator());
 
             switch (view.getId()) {
                 case R.id.cv_menu_scan:
-                    duration = 200;
+                    duration = 140;
                     break;
                 case R.id.cv_menu_receive:
-                    duration = 180;
+                    duration = 120;
                     break;
                 case R.id.cv_menu_update:
-                    duration = 160;
+                    duration = 100;
                     break;
             }
+
+            translationY_scan_set.setDuration(duration);
         } else {
             //回来 按钮就不能点击了
             setButtonClickable(false);
@@ -295,9 +306,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         translationY_scan_set.start();
     }
 
-    private void hideText(TextView tv) {
+    private void hideText(final TextView tv) {
         //因为快速点击时存在bug，故必须在此处强制隐藏
         if (tv.getVisibility() == View.VISIBLE) {
+            /*ObjectAnimator alphaAnimator = ObjectAnimator.ofFloat(tv, "alpha", 1, 0);
+            alphaAnimator.setDuration(150);
+            alphaAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    //回程动画一开始就关闭文字的显示
+                    tv.setVisibility(View.INVISIBLE);
+                }
+            });
+            alphaAnimator.start();*/
+
             //回程动画一开始就关闭文字的显示
             tv.setVisibility(View.INVISIBLE);
         }
